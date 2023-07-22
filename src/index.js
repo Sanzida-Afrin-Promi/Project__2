@@ -8,6 +8,25 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 
+const port = process.env.PORT || 3000 
+app.use(express.json())
+
+app.use(express.urlencoded({ extended: false }))
+
+const tempelatePath = path.join(__dirname, '../Webpages')
+const publicPath = path.join(__dirname, '../public')
+console.log(publicPath);
+
+app.set('view engine', 'hbs')
+app.set('views', tempelatePath)
+app.use(express.static(publicPath))
+app.use(cookieParser());
+app.use(session({
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: true
+  }));
+
 
 const generateToken = (userId) => {
     const token = jwt.sign({ userId }, 'your-secret-key', { expiresIn: '1h' });
@@ -50,6 +69,8 @@ db.connect(err => {
     }
     console.log("Connected to MySQL");
 });
+
+
 
 app.get("/", (req, res) => {
     res.redirect("/home");
