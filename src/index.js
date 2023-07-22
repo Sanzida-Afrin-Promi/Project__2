@@ -51,6 +51,67 @@ db.connect(err => {
     console.log("Connected to MySQL");
 });
 
+app.get("/", (req, res) => {
+    res.redirect("/home");
+  });
+
+
+app.get('/login', (req, res) => {
+    const token = req.cookies.token;
+  
+    if (token) {
+      // User already authenticated, redirect to home page
+      return res.redirect('/home');
+    }
+  
+    res.render('login');
+  });
+  
+  app.get('/register', (req, res) => {
+    const token = req.cookies.token;
+  
+    if (token) {
+      // User already authenticated, redirect to home page
+      return res.redirect('/home');
+    }
+  
+    res.render('register');
+  });
+
+  app.get('/logout', (req, res) => {
+    // Destroy the session
+    req.session.destroy((err) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: 'Error destroying session' });
+      }
+  
+      // Clear the token cookie
+      res.clearCookie('token');
+  
+      // Redirect to the login page
+      res.redirect('/login');
+    });
+  });
+  
+
+  
+  
+  app.get('/home', authenticateUser, (req, res) => {
+
+    const userId = req.session.userId;
+    
+    const sql = "SELECT * FROM todolist WHERE user_id = ? ORDER BY id DESC";
+    db.query(sql, [userId], (err, result) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Error executing MySQL query" });
+      }
+      res.render('home', { todos: result });
+    });
+  });
+
+
 
 
 app.post('/user/register', (req, res) => {
