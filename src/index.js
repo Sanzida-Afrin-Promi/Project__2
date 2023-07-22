@@ -9,6 +9,33 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 
 
+const generateToken = (userId) => {
+    const token = jwt.sign({ userId }, 'your-secret-key', { expiresIn: '1h' });
+    return token;
+  };
+  
+
+  const authenticateUser = (req, res, next) => {
+    const token = req.cookies.token;
+  
+    if (!token) {
+      // No token found, user is not authenticated
+      return res.redirect('/login');
+    }
+  
+    try {
+      const decoded = jwt.verify(token, 'your-secret-key');
+      req.userId = decoded.userId;
+      next();
+    } catch (err) {
+      console.log(err);
+      // Invalid token, user is not authenticated
+      return res.redirect('/login');
+    }
+  };
+  
+
+
 const db = mysql.createConnection({
     host: "localhost",
     user: "root",
